@@ -1,0 +1,24 @@
+{
+  "name": "cravio",
+  "version": "1.0.0",
+  "description": "React food ordering app",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "(https://github.com/ayushichhangani71/Cravio.git)"
+  },
+  "keywords": [
+    "React",
+    "Ayushi",
+    "Chhangani",
+    "Cravio"
+  ],
+  "author": "Ayushi Chhangani",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.15.4"
+  }
+}
