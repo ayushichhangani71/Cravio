@@ -1,7 +1,15 @@
+
 import RestaurantCard from "./RestaurantCard";
 import { useState, useEffect } from "react";
 import resList from "../utils/mockData";
 import Shimmer from "./Shimmer";
+import RestaurantCard from "./RestaurantCard";
+import { useState, useEffect } from "react";
+import resList from "../utils/mockData";
+import useOnlineStatus from "../utils/useOnlineStatus";
+import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
+import { SWIGGY_API_URL } from "../utils/constants";
 
 const Body = () => {
     //Local State variable - Super powerful variable
@@ -18,14 +26,25 @@ const Body = () => {
     }, []);
 
     const fetchData = async () => {
-        const data = await fetch(
-            "https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=26.2389469&lng=73.02430939999999&carousel=true&third_party_vendor=1"
-        );
+        const data = await fetch(SWIGGY_API_URL); 
         const json = await data.json();
-        console.log(json);
         // optional chaining
-        setListOfRestaurant(json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
-        setfilteredRestaurant(json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
+        const restaurants = json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants || [];
+
+        setListOfRestaurant(restaurants);
+        setfilteredRestaurant(restaurants);
+
+        console.log("✅ Fetched successfully", restaurants.length);
+        console.log(json);
+    };
+
+    const onlineStatus = useOnlineStatus();
+    if(onlineStatus === false) {
+        return (
+        <h1>
+            Looks like you are offline!! Please check your internet connection.
+        </h1>
+        );
     };
 
     //if(listOfRestaurants.length === 0) {
@@ -33,40 +52,48 @@ const Body = () => {
     // };
     // conditional Rendering
     return listOfRestaurants.length === 0 ? (<Shimmer />) : (
-        <div className="body">
-            <div className="filter">
-            <div className="search">
+        <div className="px-11">
+            <div className="flex items-center">
+            <div>
                 <input type="text"
-                className="search-box"
+                className="border border-solid"
                  value={searchText}
                  onChange={(e) => {
                     setsearchText(e.target.value);
-                 }} />
-                <button className="search-btn" onClick={() => {
-                    // Filter the list of restaurants and update the UI
-                    // searchText
-                    const filteredList = listOfRestaurants.filter(
-                        (res)=> res.info.name.toLowerCase().includes(searchText.toLowerCase())
-                    );
-                    setListOfRestaurant(filteredList); 
-                    console.log(searchText);
-                }}>search</button>
+                 }} 
+                 />
+                <button className="px-4 py-1 bg-green-100 m-4 rounded-lg"
+                    onClick={() => {
+                        // Filter the list of restaurants and update the UI
+                        // searchText
+                        const filteredList = listOfRestaurants.filter(
+                            (res)=> res.info.name.toLowerCase().includes(searchText.toLowerCase())
+                        );
+                        setfilteredRestaurant(filteredList); 
+                        console.log(searchText);
+                    }}>search</button>
             </div>
-                <button className="filter-btn" 
+            <div className="m-4">
+                <button className="px-4 py-1 bg-green-100 rounded-lg" 
                 onClick={() => {
                     // filter logic here
                     const filteredList = listOfRestaurants.filter(
                         (res) => res.info.avgRating > 4
                     );
-                    setListOfRestaurant(filteredList);
+                    setfilteredRestaurant(filteredList);
                      // console.log(listOfRestaurants); 
                      }}
-                >
+                    >
                     Top Rated Restaurants</button>
+            </div>
+                
                 </div>
-            <div className="res-container">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-8 py-2">
                 {filteredRestaurant.map((restaurant) => (
-                    <RestaurantCard key={restaurant.info.id} resData={restaurant}/>
+                    <Link key={restaurant.info.id}
+                     to={"/restaurants/"+ restaurant.info.id}>
+                        <RestaurantCard resData={restaurant}/>
+                        </Link>
                 ))}              
             </div>
         </div>
